@@ -5,6 +5,7 @@ import { useCartStore } from "@/stores/cartStore";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import SearchModal from "./SearchModal";
+import { useSettings } from "@/hooks/useSettings";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -13,6 +14,7 @@ const Header = () => {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const { setOpen, getTotalItems } = useCartStore();
   const { user, isAdmin, signOut } = useAuth();
+  const { data: settings } = useSettings();
   const navigate = useNavigate();
 
   const navLinks = [
@@ -34,14 +36,6 @@ const Header = () => {
       >
         <div className="container-wide px-4 md:px-8">
           <div className="flex items-center justify-between h-16 md:h-20">
-            {/* Mobile Menu Button */}
-            <button
-              onClick={() => setIsMenuOpen(true)}
-              className="md:hidden p-2 text-foreground hover:text-muted-foreground transition-colors"
-            >
-              <Menu size={24} />
-            </button>
-
             {/* Desktop Nav */}
             <nav className="hidden md:flex items-center gap-8">
               {navLinks.slice(0, 3).map((link) => (
@@ -53,13 +47,38 @@ const Header = () => {
                   {link.label}
                 </a>
               ))}
+              {user ? (
+                <>
+                  {isAdmin && (
+                    <button
+                      onClick={() => navigate('/admin')}
+                      className="text-caption hover:text-red-accent transition-colors duration-300"
+                    >
+                      Admin
+                    </button>
+                  )}
+                  <button
+                    onClick={() => signOut()}
+                    className="text-caption hover:text-foreground transition-colors duration-300"
+                  >
+                    Sign Out
+                  </button>
+                </>
+              ) : (
+                <Link
+                  to="/auth"
+                  className="text-caption hover:text-foreground transition-colors duration-300"
+                >
+                  Login
+                </Link>
+              )}
             </nav>
 
             {/* Logo */}
             <Link to="/" className="absolute left-1/2 -translate-x-1/2">
-              <img 
-                src="/logo-placeholder.png" 
-                alt="YEOUBI" 
+              <img
+                src="/logo-placeholder.png"
+                alt="YEOUBI"
                 className="h-10 md:h-12 w-auto"
                 onError={(e) => {
                   e.currentTarget.style.display = 'none';
@@ -104,58 +123,14 @@ const Header = () => {
                 </AnimatePresence>
               </div>
 
-              <button 
+              <button
                 onClick={() => setIsSearchOpen(true)}
                 className="p-2 hover:text-muted-foreground transition-colors"
               >
                 <Search size={20} />
               </button>
 
-              {/* User Menu */}
-              <div className="relative">
-                <button
-                  onClick={() => user ? setIsUserMenuOpen(!isUserMenuOpen) : navigate('/auth')}
-                  className="p-2 hover:text-muted-foreground transition-colors"
-                >
-                  <User size={20} />
-                </button>
-                <AnimatePresence>
-                  {isUserMenuOpen && user && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 10 }}
-                      className="absolute top-full right-0 mt-2 glass-strong rounded-lg p-3 min-w-[160px]"
-                    >
-                      <p className="text-xs text-muted-foreground px-3 pb-2 border-b border-border mb-2 truncate">
-                        {user.email}
-                      </p>
-                      {isAdmin && (
-                        <button
-                          onClick={() => {
-                            navigate('/admin');
-                            setIsUserMenuOpen(false);
-                          }}
-                          className="flex items-center gap-2 w-full text-left px-3 py-2 text-sm hover:bg-muted rounded transition-colors text-red-accent"
-                        >
-                          <Shield size={16} />
-                          Admin Panel
-                        </button>
-                      )}
-                      <button
-                        onClick={async () => {
-                          await signOut();
-                          setIsUserMenuOpen(false);
-                        }}
-                        className="flex items-center gap-2 w-full text-left px-3 py-2 text-sm hover:bg-muted rounded transition-colors"
-                      >
-                        <LogOut size={16} />
-                        Sign Out
-                      </button>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+
 
               <button
                 onClick={() => setOpen(true)}
@@ -168,6 +143,14 @@ const Header = () => {
                   </span>
                 )}
               </button>
+
+              {/* Mobile Menu Button */}
+              <button
+                onClick={() => setIsMenuOpen(true)}
+                className="md:hidden p-2 text-foreground hover:text-muted-foreground transition-colors"
+              >
+                <Menu size={24} />
+              </button>
             </div>
           </div>
         </div>
@@ -178,7 +161,7 @@ const Header = () => {
             <div className="marquee-track whitespace-nowrap flex">
               {[...Array(10)].map((_, i) => (
                 <span key={i} className="text-caption mx-8">
-                  FREE SHIPPING ON ORDERS OVER ₹999 • USE CODE <span className="text-red-accent font-semibold">YEO10</span> FOR 10% OFF
+                  {settings?.announcement_text || "FREE SHIPPING ON ORDERS OVER ₹999 • USE CODE YEO10 FOR 10% OFF"}
                 </span>
               ))}
             </div>
@@ -205,9 +188,9 @@ const Header = () => {
               className="fixed left-0 top-0 bottom-0 w-80 glass-strong z-50 p-6"
             >
               <div className="flex justify-between items-center mb-10">
-                <img 
-                  src="/logo-placeholder.png" 
-                  alt="YEOUBI" 
+                <img
+                  src="/logo-placeholder.png"
+                  alt="YEOUBI"
                   className="h-8 w-auto"
                   onError={(e) => {
                     e.currentTarget.style.display = 'none';
@@ -230,6 +213,45 @@ const Header = () => {
                     {link.label}
                   </a>
                 ))}
+
+                <div className="pt-6 border-t border-border mt-6">
+                  {user ? (
+                    <div className="space-y-4">
+                      <div className="text-sm text-muted-foreground px-1">{user.email}</div>
+                      {isAdmin && (
+                        <button
+                          onClick={() => {
+                            navigate('/admin');
+                            setIsMenuOpen(false);
+                          }}
+                          className="flex items-center gap-2 text-xl font-display font-medium text-red-accent hover:text-red-600 transition-colors w-full text-left"
+                        >
+                          <Shield size={20} />
+                          Admin Panel
+                        </button>
+                      )}
+                      <button
+                        onClick={async () => {
+                          await signOut();
+                          setIsMenuOpen(false);
+                        }}
+                        className="flex items-center gap-2 text-xl font-display font-medium hover:text-muted-foreground transition-colors w-full text-left"
+                      >
+                        <LogOut size={20} />
+                        Sign Out
+                      </button>
+                    </div>
+                  ) : (
+                    <Link
+                      to="/auth"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="flex items-center gap-2 text-xl font-display font-medium hover:text-muted-foreground transition-colors"
+                    >
+                      <User size={20} />
+                      Login
+                    </Link>
+                  )}
+                </div>
               </nav>
               <div className="mt-10 pt-6 border-t border-border">
                 <p className="text-caption mb-4">Currency</p>

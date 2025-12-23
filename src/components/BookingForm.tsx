@@ -19,7 +19,7 @@ const BookingForm = ({ isOpen, onClose, selectedItems }: BookingFormProps) => {
   const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discount: number } | null>(null);
   const [applyingCoupon, setApplyingCoupon] = useState(false);
   const [timeLeft, setTimeLeft] = useState(60);
-  
+
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -36,9 +36,9 @@ const BookingForm = ({ isOpen, onClose, selectedItems }: BookingFormProps) => {
   const total = subtotal - discount;
 
   // Generate UPI payment URL with amount
-  const upiPayeeId = "9946668104@upi"; // Replace with actual UPI ID
+  const upiPayeeId = "8330858233@upi"; // Updated with new UPI ID
   const upiUrl = `upi://pay?pa=${upiPayeeId}&pn=YEOUBI&am=${total.toFixed(2)}&tn=${encodeURIComponent(formData.name || 'Order Payment')}&cu=INR`;
-  
+
   // Generate QR code URL using a free QR API
   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiUrl)}`;
 
@@ -66,7 +66,7 @@ const BookingForm = ({ isOpen, onClose, selectedItems }: BookingFormProps) => {
 
   const applyCoupon = async () => {
     if (!couponCode.trim()) return;
-    
+
     setApplyingCoupon(true);
     try {
       const { data, error } = await supabase
@@ -101,7 +101,7 @@ const BookingForm = ({ isOpen, onClose, selectedItems }: BookingFormProps) => {
 
   const handleProceedToPayment = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.name || !formData.phone || !formData.email || !formData.address) {
       toast.error('Please fill in all required fields');
       return;
@@ -156,7 +156,7 @@ const BookingForm = ({ isOpen, onClose, selectedItems }: BookingFormProps) => {
 
   const handleUpiAppOpen = (app: string) => {
     let intentUrl = upiUrl;
-    
+
     if (app === 'gpay') {
       intentUrl = `tez://upi/pay?pa=${upiPayeeId}&pn=YEOUBI&am=${total.toFixed(2)}&tn=${encodeURIComponent(formData.name || 'Order Payment')}&cu=INR`;
     } else if (app === 'paytm') {
@@ -164,7 +164,7 @@ const BookingForm = ({ isOpen, onClose, selectedItems }: BookingFormProps) => {
     } else if (app === 'phonepe') {
       intentUrl = `phonepe://pay?pa=${upiPayeeId}&pn=YEOUBI&am=${total.toFixed(2)}&tn=${encodeURIComponent(formData.name || 'Order Payment')}&cu=INR`;
     }
-    
+
     window.open(intentUrl, '_blank');
   };
 
@@ -379,9 +379,9 @@ const BookingForm = ({ isOpen, onClose, selectedItems }: BookingFormProps) => {
               {/* QR Code */}
               <div className="flex justify-center mb-6">
                 <div className="glass p-4 rounded-2xl">
-                  <img 
-                    src={qrCodeUrl} 
-                    alt="Payment QR Code" 
+                  <img
+                    src={qrCodeUrl}
+                    alt="Payment QR Code"
                     className="w-48 h-48 rounded-lg"
                   />
                   <p className="text-center text-xs text-muted-foreground mt-2">Scan to pay with any UPI app</p>

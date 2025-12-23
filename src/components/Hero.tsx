@@ -1,7 +1,11 @@
 import { motion } from "framer-motion";
 import heroImage from "@/assets/hero-image.jpg";
+import CountdownTimer from "./CountdownTimer";
+import { useSettings } from "@/hooks/useSettings";
 
 const Hero = () => {
+  const { data: settings } = useSettings();
+
   return (
     <section className="relative h-screen flex items-center justify-center overflow-hidden">
       {/* Background Image */}
@@ -11,7 +15,8 @@ const Hero = () => {
           alt="YEOUBI Collection"
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/30 to-background" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-transparent to-background" />
+        <div className="absolute inset-0 bg-noise opacity-[0.2]" />
       </div>
 
       {/* Content */}
@@ -38,10 +43,21 @@ const Hero = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.7, duration: 0.6 }}
-          className="text-subhead mb-10 font-light italic"
+          className="text-subhead mb-8 font-light italic"
         >
           Crafted for the Fearless.
         </motion.p>
+
+        {settings?.countdown_target && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.8, duration: 0.6 }}
+            className="mb-10"
+          >
+            <CountdownTimer targetDate={settings.countdown_target} />
+          </motion.div>
+        )}
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}

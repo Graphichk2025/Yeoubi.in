@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { 
-  Users, Tag, Package, LogOut, Loader2, 
+import {
+  Users, Tag, Package, LogOut, Loader2,
   Plus, Trash2, Check, X, Download, MessageCircle,
   Upload, Image, Sparkles, Eye, EyeOff, Calendar, Instagram, Edit
 } from 'lucide-react';
@@ -81,7 +81,7 @@ interface Offer {
   created_at: string;
 }
 
-type AdminTab = 'products' | 'bookings' | 'coupons' | 'messages' | 'offers';
+type AdminTab = 'products' | 'bookings' | 'coupons' | 'messages' | 'offers' | 'settings';
 
 const Admin = () => {
   const { user, isAdmin, loading, signOut } = useAuth();
@@ -93,9 +93,15 @@ const Admin = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [offers, setOffers] = useState<Offer[]>([]);
+  const [settings, setSettings] = useState<{
+    id: string;
+    logo_url: string | null;
+    countdown_target: string | null;
+    announcement_text: string | null;
+  } | null>(null);
   const [loadingData, setLoadingData] = useState(true);
   const [unreadCount, setUnreadCount] = useState(0);
-  
+
   // Product form
   const [showProductForm, setShowProductForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -113,7 +119,7 @@ const Admin = () => {
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [uploadingProduct, setUploadingProduct] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   // Coupon form
   const [showCouponForm, setShowCouponForm] = useState(false);
   const [couponForm, setCouponForm] = useState({
@@ -193,6 +199,34 @@ const Admin = () => {
           .select('*')
           .order('created_at', { ascending: false });
         if (!error && data) setOffers(data);
+      } else if (activeTab === 'settings') {
+        const { data, error } = await supabase
+          .from('site_settings')
+          .select('*')
+          .maybeSingle();
+
+        if (!error && (data as any)) {
+          const d = data as any;
+          setSettings({
+            id: d.id,
+            logo_url: d.logo_url || null,
+            countdown_target: d.countdown_target || null,
+            announcement_text: d.announcement_text || null
+          });
+        } else if (!error && !data) {
+          // Initialize empty settings if row is missing
+          setSettings({
+            id: '',
+            logo_url: null,
+            countdown_target: null,
+            announcement_text: null
+          });
+        } else if (error) {
+          console.error('Error fetching settings:', error);
+          if (activeTab === 'settings') {
+            toast.error('Could not fetch settings. Please ensure database table and columns exist.');
+          }
+        }
       }
     } finally {
       setLoadingData(false);
@@ -238,7 +272,7 @@ const Admin = () => {
       for (const image of productImages) {
         const fileExt = image.name.split('.').pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
-        
+
         const { error: uploadError } = await supabase.storage
           .from('products')
           .upload(fileName, image);
@@ -248,7 +282,7 @@ const Admin = () => {
         const { data: urlData } = supabase.storage
           .from('products')
           .getPublicUrl(fileName);
-        
+
         uploadedImageUrls.push(urlData.publicUrl);
       }
 
@@ -410,6 +444,33 @@ const Admin = () => {
     }
   };
 
+  const handleSaveSettings = async () => {
+    if (!settings) return;
+
+    const updateData = {
+      countdown_target: settings.countdown_target,
+      announcement_text: settings.announcement_text,
+      logo_url: settings.logo_url
+    };
+
+    let error;
+    if (settings.id) {
+      const res = await (supabase.from('site_settings') as any).update(updateData).eq('id', settings.id);
+      error = res.error;
+    } else {
+      const res = await (supabase.from('site_settings') as any).insert([updateData]);
+      error = res.error;
+    }
+
+    if (error) {
+      console.error('Save settings error:', error);
+      toast.error('Failed to update settings. Make sure columns exist in site_settings table.');
+    } else {
+      toast.success('Settings updated successfully');
+      fetchData();
+    }
+  };
+
   // Message functions
   const markMessageRead = async (id: string, isRead: boolean) => {
     await supabase.from('messages').update({ is_read: !isRead }).eq('id', id);
@@ -421,7 +482,7 @@ const Admin = () => {
   const downloadBookingsCSV = (filterDate?: string) => {
     let filteredBookings = bookings;
     if (filterDate) {
-      filteredBookings = bookings.filter(b => 
+      filteredBookings = bookings.filter(b =>
         new Date(b.created_at).toISOString().split('T')[0] === filterDate
       );
     }
@@ -470,7 +531,7 @@ const Admin = () => {
   };
 
   const dailyStats = getDailyStats();
-  const filteredBookings = bookings.filter(b => 
+  const filteredBookings = bookings.filter(b =>
     new Date(b.created_at).toISOString().split('T')[0] === bookingDateFilter
   );
   const todayStats = dailyStats[bookingDateFilter] || { count: 0, total: 0 };
@@ -494,6 +555,7 @@ const Admin = () => {
     { id: 'coupons' as AdminTab, label: 'Coupons', icon: Tag },
     { id: 'messages' as AdminTab, label: 'Messages', icon: MessageCircle, badge: unreadCount },
     { id: 'offers' as AdminTab, label: 'Offers', icon: Sparkles },
+    { id: 'settings' as AdminTab, label: 'Settings', icon: Edit },
   ];
 
   return (
@@ -532,11 +594,10 @@ const Admin = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors relative ${
-                activeTab === tab.id
-                  ? 'bg-foreground text-background'
-                  : 'glass hover:bg-muted'
-              }`}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors relative ${activeTab === tab.id
+                ? 'bg-foreground text-background'
+                : 'glass hover:bg-muted'
+                }`}
             >
               <tab.icon size={18} />
               {tab.label}
@@ -652,9 +713,9 @@ const Admin = () => {
                               <span className="text-sm text-muted-foreground w-full">Existing:</span>
                               {existingImages.map((img, idx) => (
                                 <div key={`existing-${idx}`} className="relative">
-                                  <img 
-                                    src={img} 
-                                    alt={`Existing ${idx}`} 
+                                  <img
+                                    src={img}
+                                    alt={`Existing ${idx}`}
                                     className="w-16 h-16 object-cover rounded-lg"
                                   />
                                   <button
@@ -673,9 +734,9 @@ const Admin = () => {
                               <span className="text-sm text-muted-foreground w-full">New:</span>
                               {productImages.map((img, idx) => (
                                 <div key={`new-${idx}`} className="relative">
-                                  <img 
-                                    src={URL.createObjectURL(img)} 
-                                    alt={`Preview ${idx}`} 
+                                  <img
+                                    src={URL.createObjectURL(img)}
+                                    alt={`Preview ${idx}`}
                                     className="w-16 h-16 object-cover rounded-lg"
                                   />
                                   <button
@@ -698,8 +759,8 @@ const Admin = () => {
                         />
                       </div>
                       <div className="flex gap-2 mt-4">
-                        <button 
-                          onClick={handleSaveProduct} 
+                        <button
+                          onClick={handleSaveProduct}
                           disabled={uploadingProduct}
                           className="glass-btn-primary flex items-center gap-2"
                         >
@@ -754,9 +815,8 @@ const Admin = () => {
                           </button>
                           <button
                             onClick={() => toggleProductStatus(product.id, product.is_active)}
-                            className={`p-2 rounded-lg text-sm ${
-                              product.is_active ? 'glass hover:bg-muted' : 'bg-green-500/20 text-green-500'
-                            }`}
+                            className={`p-2 rounded-lg text-sm ${product.is_active ? 'glass hover:bg-muted' : 'bg-green-500/20 text-green-500'
+                              }`}
                           >
                             {product.is_active ? <EyeOff size={14} /> : <Eye size={14} />}
                           </button>
@@ -981,11 +1041,10 @@ const Admin = () => {
                             </td>
                             <td className="py-4">
                               <span
-                                className={`px-2 py-1 rounded text-xs ${
-                                  coupon.is_active
-                                    ? 'bg-green-500/20 text-green-500'
-                                    : 'bg-muted text-muted-foreground'
-                                }`}
+                                className={`px-2 py-1 rounded text-xs ${coupon.is_active
+                                  ? 'bg-green-500/20 text-green-500'
+                                  : 'bg-muted text-muted-foreground'
+                                  }`}
                               >
                                 {coupon.is_active ? 'Active' : 'Inactive'}
                               </span>
@@ -1138,9 +1197,8 @@ const Admin = () => {
                         <div className="flex gap-2">
                           <button
                             onClick={() => toggleOfferStatus(offer.id, offer.is_active)}
-                            className={`p-2 rounded-lg ${
-                              offer.is_active ? 'glass hover:bg-muted' : 'bg-green-500/20 text-green-500'
-                            }`}
+                            className={`p-2 rounded-lg ${offer.is_active ? 'glass hover:bg-muted' : 'bg-green-500/20 text-green-500'
+                              }`}
                           >
                             {offer.is_active ? <EyeOff size={16} /> : <Eye size={16} />}
                           </button>
@@ -1158,6 +1216,57 @@ const Admin = () => {
                         No offers yet
                       </div>
                     )}
+                  </div>
+                </div>
+              )}
+
+              {/* Settings Tab */}
+              {activeTab === 'settings' && settings && (
+                <div className="max-w-2xl mx-auto py-6">
+                  <h2 className="text-xl font-bold mb-6">Site Settings</h2>
+
+                  <div className="space-y-6">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                        <Calendar size={16} />
+                        Next Drop Countdown Timer
+                      </label>
+                      <input
+                        type="datetime-local"
+                        value={settings.countdown_target ? (() => {
+                          const date = new Date(settings.countdown_target);
+                          const offset = date.getTimezoneOffset() * 60000;
+                          return new Date(date.getTime() - offset).toISOString().slice(0, 16);
+                        })() : ''}
+                        onChange={(e) => setSettings({ ...settings, countdown_target: e.target.value ? new Date(e.target.value).toISOString() : null })}
+                        className="w-full glass px-4 py-3 rounded-xl focus:ring-2 focus:ring-red-accent/50 transition-all"
+                      />
+                      <p className="text-xs text-muted-foreground italic">
+                        Set the date and time for the next product launch. Leave empty to hide the timer.
+                      </p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                        <Sparkles size={16} />
+                        Banner Announcement Text
+                      </label>
+                      <textarea
+                        value={settings.announcement_text || ''}
+                        onChange={(e) => setSettings({ ...settings, announcement_text: e.target.value })}
+                        placeholder="e.g. FREE SHIPPING ON ORDERS OVER ₹999 • USE CODE YEO10"
+                        className="w-full glass px-4 py-3 rounded-xl focus:ring-2 focus:ring-red-accent/50 transition-all min-h-[100px]"
+                      />
+                    </div>
+
+                    <div className="pt-4">
+                      <button
+                        onClick={handleSaveSettings}
+                        className="w-full glass-btn-primary py-4 text-lg font-bold tracking-wider"
+                      >
+                        Publish Changes
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}

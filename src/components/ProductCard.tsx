@@ -16,10 +16,10 @@ const ProductCard = ({ product, delay = 0 }: ProductCardProps) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   // Get all images (prefer images array, fallback to image_url)
-  const images = product.images && product.images.length > 0 
-    ? product.images 
-    : product.image_url 
-      ? [product.image_url] 
+  const images = product.images && product.images.length > 0
+    ? product.images
+    : product.image_url
+      ? [product.image_url]
       : [];
 
   // Auto-scroll images every 3 seconds
@@ -34,14 +34,14 @@ const ProductCard = ({ product, delay = 0 }: ProductCardProps) => {
   }, [images.length]);
 
   const hasDiscount = product.original_price && product.original_price > product.price;
-  const discountPercent = hasDiscount 
+  const discountPercent = hasDiscount
     ? Math.round(((product.original_price! - product.price) / product.original_price!) * 100)
     : 0;
 
   const handleQuickAdd = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     const cartProduct: CartProduct = {
       id: product.id,
       name: product.name,
@@ -71,8 +71,9 @@ const ProductCard = ({ product, delay = 0 }: ProductCardProps) => {
         viewport={{ once: true }}
         transition={{ delay, duration: 0.6 }}
         whileHover={{ y: -8 }}
-        className="group"
+        className="group relative"
       >
+        <div className="absolute -inset-0.5 bg-gradient-to-r from-red-accent/20 to-gold/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-500" />
         <div className="glass-card-hover relative overflow-hidden aspect-[3/4] mb-4">
           {/* Special Badge */}
           {product.badge && (
@@ -80,7 +81,7 @@ const ProductCard = ({ product, delay = 0 }: ProductCardProps) => {
               {product.badge}
             </div>
           )}
-          
+
           {/* Discount Badge */}
           {hasDiscount && !product.badge && (
             <div className="absolute top-4 left-4 z-10 bg-red-accent text-white px-2.5 py-1 rounded-full text-xs font-semibold flex items-center gap-1">
@@ -91,7 +92,7 @@ const ProductCard = ({ product, delay = 0 }: ProductCardProps) => {
 
           {/* Quick Actions */}
           <div className="absolute top-4 right-4 z-10 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <motion.button 
+            <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               className="glass p-2 rounded-full hover:bg-muted transition-colors"
@@ -109,9 +110,8 @@ const ProductCard = ({ product, delay = 0 }: ProductCardProps) => {
                   key={idx}
                   src={img}
                   alt={`${product.name} ${idx + 1}`}
-                  className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
-                    idx === currentImageIndex ? 'opacity-100' : 'opacity-0'
-                  }`}
+                  className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${idx === currentImageIndex ? 'opacity-100' : 'opacity-0'
+                    }`}
                 />
               ))}
               {/* Image Indicators */}
@@ -125,11 +125,10 @@ const ProductCard = ({ product, delay = 0 }: ProductCardProps) => {
                         e.stopPropagation();
                         setCurrentImageIndex(idx);
                       }}
-                      className={`w-1.5 h-1.5 rounded-full transition-all ${
-                        idx === currentImageIndex 
-                          ? 'bg-foreground w-4' 
+                      className={`w-1.5 h-1.5 rounded-full transition-all ${idx === currentImageIndex
+                          ? 'bg-foreground w-4'
                           : 'bg-foreground/40 hover:bg-foreground/60'
-                      }`}
+                        }`}
                     />
                   ))}
                 </div>
@@ -157,7 +156,7 @@ const ProductCard = ({ product, delay = 0 }: ProductCardProps) => {
 
         {/* Info */}
         <div className="space-y-2">
-          <h3 className="font-display font-medium text-lg group-hover:text-muted-foreground transition-colors line-clamp-1">
+          <h3 className="font-display font-bold text-base md:text-lg group-hover:text-red-accent transition-colors line-clamp-1 uppercase tracking-tight">
             {product.name}
           </h3>
           <div className="flex items-center gap-3">

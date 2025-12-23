@@ -7,13 +7,12 @@ import SectionGrid from "@/components/SectionGrid";
 import ComingSoon from "@/components/ComingSoon";
 import BrandPhilosophy from "@/components/BrandPhilosophy";
 import AboutBrand from "@/components/AboutBrand";
-import BundleOffer from "@/components/BundleOffer";
+
 import LaunchPopup from "@/components/LaunchPopup";
 import SocialProof from "@/components/SocialProof";
 import FabricQuality from "@/components/FabricQuality";
 import FAQ from "@/components/FAQ";
 import SizeGuide from "@/components/SizeGuide";
-import InstagramFeed from "@/components/InstagramFeed";
 import Footer from "@/components/Footer";
 import ContactPopup from "@/components/ContactPopup";
 import CartDrawer from "@/components/CartDrawer";
@@ -36,7 +35,7 @@ const Index = () => {
       <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
         <Header />
         <CartDrawer />
-        
+
         <main>
           <Hero />
           <ProductGrid />
@@ -44,11 +43,10 @@ const Index = () => {
           <ComingSoon />
           <BrandPhilosophy />
           <AboutBrand />
-          <BundleOffer />
+
           <SocialProof />
           <FabricQuality />
           <FAQ />
-          <InstagramFeed />
         </main>
 
         <Footer />

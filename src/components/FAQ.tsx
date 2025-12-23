@@ -54,9 +54,8 @@ const FAQ = () => {
                 <span className="font-display font-semibold text-lg">{faq.question}</span>
                 <ChevronDown
                   size={20}
-                  className={`transition-transform ${
-                    openIndex === index ? "rotate-180" : ""
-                  }`}
+                  className={`transition-transform ${openIndex === index ? "rotate-180" : ""
+                    }`}
                 />
               </button>
               <motion.div
@@ -73,19 +72,7 @@ const FAQ = () => {
           ))}
         </div>
 
-        {/* Chat Bubble */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          className="text-center mt-12"
-        >
-          <p className="text-body mb-4">Still have questions?</p>
-          <button className="glass-btn inline-flex items-center gap-2">
-            <MessageCircle size={18} />
-            Chat with Us
-          </button>
-        </motion.div>
+
       </div>
     </section>
   );

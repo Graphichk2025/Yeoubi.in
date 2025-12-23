@@ -62,7 +62,19 @@
     --sidebar-accent-foreground: 0 0% 98%;
     --sidebar-border: 0 0% 18%;
     --sidebar-ring: 0 0% 50%;
+
+    /* Premium colors */
+    --gold: 45 100% 50%;
+    --deep-red: 350 100% 40%;
   }
+}
+
+/* Background Noise Texture */
+.bg-noise {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  filter: contrast(120%) brightness(100%);
+  opacity: 0.15;
+  pointer-events: none;
 }
 
 @layer base {
@@ -83,15 +95,15 @@
 @layer components {
   /* Glassmorphism base */
   .glass {
-    @apply bg-card/60 backdrop-blur-xl border border-glass-border/30;
+    @apply bg-card/40 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)];
   }
 
   .glass-strong {
-    @apply bg-card/80 backdrop-blur-2xl border border-glass-border/40;
+    @apply bg-card/70 backdrop-blur-2xl border border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)];
   }
 
   .glass-subtle {
-    @apply bg-card/30 backdrop-blur-lg border border-glass-border/20;
+    @apply bg-card/20 backdrop-blur-lg border border-white/5;
   }
 
   /* Glass card variants */
@@ -140,7 +152,7 @@
 
   /* Layout helpers */
   .section-padding {
-    @apply px-4 md:px-8 lg:px-16 py-16 md:py-24 lg:py-32;
+    @apply px-4 md:px-8 lg:px-16 py-20 md:py-32 lg:py-40;
   }
 
   .container-wide {
