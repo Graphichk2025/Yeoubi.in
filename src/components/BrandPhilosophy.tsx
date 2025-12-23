@@ -3,8 +3,8 @@ import brandBg from "@/assets/brand-bg.jpg";
 
 const statements = [
   "YEOUBI stands for bold individuality.",
-  "Minimalism with attitude.",
-  "Designed for creators, rebels, and culture-makers.",
+  "Minimalism as a statement.",
+  "Redefining streetwear beyond stickers.",
 ];
 
 const BrandPhilosophy = () => {

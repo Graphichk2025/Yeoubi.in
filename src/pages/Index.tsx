@@ -9,7 +9,6 @@ import BrandPhilosophy from "@/components/BrandPhilosophy";
 import AboutBrand from "@/components/AboutBrand";
 
 import LaunchPopup from "@/components/LaunchPopup";
-import SocialProof from "@/components/SocialProof";
 import FabricQuality from "@/components/FabricQuality";
 import FAQ from "@/components/FAQ";
 import SizeGuide from "@/components/SizeGuide";
@@ -44,7 +43,6 @@ const Index = () => {
           <BrandPhilosophy />
           <AboutBrand />
 
-          <SocialProof />
           <FabricQuality />
           <FAQ />
         </main>
