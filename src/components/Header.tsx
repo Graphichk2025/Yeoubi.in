@@ -37,45 +37,56 @@ const Header = () => {
         <div className="container-wide px-4 md:px-8">
           <div className="flex items-center justify-between h-16 md:h-20">
             {/* Desktop Nav */}
-            <nav className="hidden md:flex items-center gap-8">
-              {navLinks.slice(0, 3).map((link) => (
-                <a
-                  key={link.label}
-                  href={link.href}
-                  className="text-caption hover:text-foreground transition-colors duration-300"
-                >
-                  {link.label}
-                </a>
-              ))}
-              {user ? (
-                <>
-                  {isAdmin && (
-                    <button
-                      onClick={() => navigate('/admin')}
-                      className="text-caption hover:text-red-accent transition-colors duration-300"
-                    >
-                      Admin
-                    </button>
-                  )}
-                  <button
-                    onClick={() => signOut()}
+            {/* Left Section: Mobile Menu (left) and Desktop Nav */}
+            <div className="flex items-center gap-4 md:gap-8 flex-1">
+              {/* Mobile Menu Button - Moved to Left */}
+              <button
+                onClick={() => setIsMenuOpen(true)}
+                className="md:hidden p-2 text-foreground hover:text-muted-foreground transition-colors"
+              >
+                <Menu size={24} />
+              </button>
+
+              <nav className="hidden md:flex items-center gap-8">
+                {navLinks.slice(0, 3).map((link) => (
+                  <a
+                    key={link.label}
+                    href={link.href}
                     className="text-caption hover:text-foreground transition-colors duration-300"
                   >
-                    Sign Out
-                  </button>
-                </>
-              ) : (
-                <Link
-                  to="/auth"
-                  className="text-caption hover:text-foreground transition-colors duration-300"
-                >
-                  Login
-                </Link>
-              )}
-            </nav>
+                    {link.label}
+                  </a>
+                ))}
+                {user ? (
+                  <>
+                    {isAdmin && (
+                      <button
+                        onClick={() => navigate('/admin')}
+                        className="text-caption hover:text-red-accent transition-colors duration-300"
+                      >
+                        Admin
+                      </button>
+                    )}
+                    <button
+                      onClick={() => signOut()}
+                      className="text-caption hover:text-foreground transition-colors duration-300"
+                    >
+                      Sign Out
+                    </button>
+                  </>
+                ) : (
+                  <Link
+                    to="/auth"
+                    className="text-caption hover:text-foreground transition-colors duration-300"
+                  >
+                    Login
+                  </Link>
+                )}
+              </nav>
+            </div>
 
-            {/* Logo */}
-            <Link to="/" className="absolute left-1/2 -translate-x-1/2">
+            {/* Logo - Centered */}
+            <Link to="/" className="absolute left-1/2 -translate-x-1/2 z-10">
               <img
                 src="/logo-placeholder.png"
                 alt="YEOUBI"
@@ -90,8 +101,8 @@ const Header = () => {
               </h1>
             </Link>
 
-            {/* Right Actions */}
-            <div className="flex items-center gap-4 md:gap-6">
+            {/* Right Actions: Search and Cart */}
+            <div className="flex items-center justify-end gap-2 md:gap-6 flex-1">
               {/* Language/Currency Selector */}
               <div className="hidden md:block relative">
                 <button
@@ -130,8 +141,6 @@ const Header = () => {
                 <Search size={20} />
               </button>
 
-
-
               <button
                 onClick={() => setOpen(true)}
                 className="relative p-2 hover:text-muted-foreground transition-colors"
@@ -142,14 +151,6 @@ const Header = () => {
                     {getTotalItems()}
                   </span>
                 )}
-              </button>
-
-              {/* Mobile Menu Button */}
-              <button
-                onClick={() => setIsMenuOpen(true)}
-                className="md:hidden p-2 text-foreground hover:text-muted-foreground transition-colors"
-              >
-                <Menu size={24} />
               </button>
             </div>
           </div>
